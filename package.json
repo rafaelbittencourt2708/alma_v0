@@ -11,6 +11,7 @@
   "dependencies": {
     "@clerk/nextjs": "^4.31.6",
     "@supabase/supabase-js": "^2.46.1",
+    "buffer": "^6.0.3",
     "next": "14.0.3",
     "react": "^18",
     "react-dom": "^18",

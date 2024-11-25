@@ -6,9 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 export interface Organization {
   id: string;
   name: string;
-  slug: string;
-  type?: string;
-  active?: boolean;
+  clerk_id: string;
   created_at: string;
   updated_at: string;
 }
@@ -34,7 +32,7 @@ export function useOrganization() {
         const { data, error } = await supabase
           .from('organizations')
           .select('*')
-          .eq('id', organization.id)
+          .eq('clerk_id', organization.id)
           .single();
 
         if (error) throw error;

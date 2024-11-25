@@ -1,13 +1,15 @@
+# Base image
 FROM node:18-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
-COPY package.json package-lock.json* ./
-RUN npm ci
+# Install dependencies with specific flags for production
+COPY package*.json ./
+RUN npm ci --include=dev
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -16,54 +18,40 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Set environment variables for build
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS=--max-old-space-size=4096
 
-# Add build-time environment variables
-ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-ARG NEXT_PUBLIC_CLERK_SIGN_IN_URL
-ARG NEXT_PUBLIC_CLERK_SIGN_UP_URL
-ARG NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL
-ARG NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
-ARG NEXT_PUBLIC_SUPABASE_URL
-ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+# Build with fallback and debug output
+RUN npm run build || \
+    (echo "First build attempt failed. Retrying with debug output..." && \
+     NODE_OPTIONS='--max-old-space-size=4096 --trace-warnings' npm run build --verbose)
 
-ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-ENV NEXT_PUBLIC_CLERK_SIGN_IN_URL=$NEXT_PUBLIC_CLERK_SIGN_IN_URL
-ENV NEXT_PUBLIC_CLERK_SIGN_UP_URL=$NEXT_PUBLIC_CLERK_SIGN_UP_URL
-ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=$NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL
-ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=$NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
-ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-# Show environment for debugging (excluding sensitive values)
-RUN echo "Build environment:" && \
-    echo "NODE_ENV: $NODE_ENV" && \
-    echo "NEXT_TELEMETRY_DISABLED: $NEXT_TELEMETRY_DISABLED" && \
-    echo "Clerk URLs configured: $NEXT_PUBLIC_CLERK_SIGN_IN_URL, $NEXT_PUBLIC_CLERK_SIGN_UP_URL"
-
-# Build Next.js with detailed output
-RUN npm run build --verbose || (echo "Build failed. Error log:" && cat /app/.next/error.log && exit 1)
-
-# Production image, copy all files and run next
+# Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
 
-# Don't run production as root
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-USER nextjs
 
-# Copy only necessary files
+COPY --from=builder /app/public ./public
+
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+# Automatically leverage output traces to reduce image size
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
-# Set runtime environment variables
-ENV PORT 3000
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+USER nextjs
 
 EXPOSE 3000
 
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+# server.js is created by next build from standalone output
 CMD ["node", "server.js"]

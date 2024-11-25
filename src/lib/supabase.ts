@@ -4,11 +4,15 @@ import { Database } from '@/types/supabase';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const createSupabaseClient = (clerkToken?: string) => {
+export const createSupabaseClient = (clerkToken?: string, organizationId?: string) => {
   const headers: Record<string, string> = {};
   
   if (clerkToken) {
     headers['Authorization'] = `Bearer ${clerkToken}`;
+  }
+
+  if (organizationId) {
+    headers['x-organization-id'] = organizationId;
   }
 
   return createClient<Database>(supabaseUrl, supabaseAnonKey, {
@@ -27,13 +31,5 @@ export const supabaseServer = createSupabaseClient();
 
 // Helper function to get organization-scoped client
 export const getOrganizationClient = async (organizationId: string, clerkToken?: string) => {
-  const client = createSupabaseClient(clerkToken);
-  
-  // Set organization ID in the client headers
-  client.headers = {
-    ...client.headers,
-    'x-organization-id': organizationId,
-  };
-  
-  return client;
+  return createSupabaseClient(clerkToken, organizationId);
 };
