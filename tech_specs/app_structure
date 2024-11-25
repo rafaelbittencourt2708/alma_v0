@@ -1,0 +1,179 @@
+project-root/
+├── .github/                    # GitHub specific configurations
+│   └── workflows/              # CI/CD workflows
+│       ├── main.yml           # Production deployment
+│       └── preview.yml        # Preview environments
+├── app/                       # Next.js App Router (Frontend)
+│   ├── (auth)/               # Authentication required routes
+│   │   ├── layout.tsx        # Authenticated layout with navigation
+│   │   ├── inbox/            # Main application feature
+│   │   │   ├── page.tsx      # Conversation list view
+│   │   │   ├── loading.tsx   # Loading state
+│   │   │   └── [conversationId]/ # Dynamic conversation routes
+│   │   │       ├── page.tsx  # Conversation with contact panel
+│   │   │       ├── loading.tsx
+│   │   │       └── error.tsx
+│   │   └── settings/        # Application settings
+│   │       └── page.tsx
+│   ├── api/                 # Backend API Routes
+│   │   ├── webhook/        # Message Processing Flow
+│   │   │   └── route.ts    # Webhook endpoint
+│   │   ├── ai-webhook/     # AI Processing Flow
+│   │   │   └── route.ts    # AI webhook endpoint
+│   │   └── internal/       # Internal APIs
+│   │       └── health/     # Health checks
+│   │           └── route.ts
+│   ├── layout.tsx          # Root layout
+│   └── page.tsx           # Landing page
+├── components/            # React Components
+│   ├── ui/               # shadcn/ui components
+│   │   ├── button.tsx
+│   │   └── [other-components].tsx
+│   ├── navigation/       # Navigation components
+│   │   ├── main-nav.tsx
+│   │   └── mobile-nav.tsx
+│   └── inbox/           # Inbox feature components
+│       ├── conversation/
+│       │   ├── list/    # Conversation list
+│       │   ├── chat/    # Chat interface
+│       │   └── contact/ # Contact panel
+│       └── shared/      # Shared components
+├── lib/                 # Shared utilities & clients
+│   ├── constants/      # Application constants
+│   │   ├── messageTypes.ts
+│   │   └── timeWindows.ts
+│   ├── queue/         # Queue clients
+│   │   ├── messageQueue.ts
+│   │   └── types.ts
+│   ├── storage/       # Storage utilities
+│   │   └── client.ts
+│   ├── db/           # Database utilities
+│   │   ├── client.ts
+│   │   └── migrations/
+│   └── ai/           # AI service clients
+│       └── flowise.ts
+├── services/         # Business Logic Layer
+│   ├── messaging/    # Message Processing Flow
+│   │   ├── webhook/  # Webhook handling
+│   │   ├── organization/
+│   │   ├── media/    # Media processing
+│   │   ├── contact/  # Contact management
+│   │   ├── conversation/
+│   │   ├── session/
+│   │   └── queue/
+│   ├── ai/          # AI Processing Flow
+│   │   ├── collector/
+│   │   ├── context/
+│   │   ├── processor/
+│   │   ├── memory/
+│   │   └── state/
+│   └── shared/      # Shared services
+│       ├── logger/
+│       ├── metrics/
+│       └── monitoring/
+├── types/           # TypeScript type definitions
+│   ├── api/        # API types
+│   ├── domain/     # Domain types
+│   └── events/     # Event types
+├── config/         # Configuration management
+│   ├── environment.ts
+│   └── services.ts
+├── scripts/        # Utility scripts
+│   ├── setup.ts
+│   └── seed.ts
+├── tests/          # Testing
+│   ├── unit/
+│   ├── integration/
+│   └── e2e/
+├── public/         # Static assets
+├── prisma/         # Database schema
+│   └── schema.prisma
+└── [configuration files]   # Various config files
+
+Key Design Decisions and Explanations:
+
+1. Root Structure
+   - Separates frontend (app/), backend (services/), and shared code (lib/)
+   - Configuration and tooling at the root level for easy access
+   - Clear separation of concerns while maintaining monorepo benefits
+
+2. Frontend Organization (app/)
+   - Uses Next.js App Router for modern React patterns
+   - Groups authenticated routes under (auth)
+   - Colocates related features (inbox with conversations)
+   - Maintains flat routes for better performance
+
+3. Component Structure (components/)
+   - Separates UI components (shadcn) from feature components
+   - Groups by feature domain (inbox, settings)
+   - Shared components easily accessible
+   - Follows atomic design principles
+
+4. Backend Services (services/)
+   - Clear separation between Message and AI processing flows
+   - Modular service architecture
+   - Each service has clear boundaries and responsibilities
+   - Shared services for cross-cutting concerns
+
+5. Data Layer (lib/)
+   - Centralizes all external client connections
+   - Manages database, queue, and storage access
+   - Provides type-safe interfaces
+   - Easy to swap implementations
+
+6. Type Management (types/)
+   - Separates API, domain, and event types
+   - Ensures type safety across the application
+   - Serves as documentation
+   - Facilitates API contract maintenance
+
+7. Testing Strategy (tests/)
+   - Separates unit, integration, and e2e tests
+   - Mirrors source structure where appropriate
+   - Supports different testing approaches
+   - Easy to run specific test suites
+
+8. Configuration Management (config/)
+   - Centralizes all configuration
+   - Environment-based settings
+   - Service-specific configurations
+   - Easy to maintain and update
+
+9. Tooling & Scripts (scripts/)
+   - Development utilities
+   - Database management
+   - Deployment helpers
+   - Maintenance tasks
+
+Key Benefits:
+
+1. Scalability
+   - Services can scale independently
+   - Easy to add new features
+   - Clear patterns for growth
+
+2. Maintainability
+   - Clear organization
+   - Consistent patterns
+   - Easy to find code
+   - Self-documenting structure
+
+3. Developer Experience
+   - Intuitive organization
+   - Quick feature location
+   - Consistent patterns
+   - Clear boundaries
+
+4. Performance
+   - Optimized route structure
+   - Efficient code splitting
+   - Clear caching boundaries
+
+5. Testing
+   - Easy to test in isolation
+   - Clear test organization
+   - Supports all testing types
+
+6. Deployment
+   - Easy to deploy to multiple environments
+   - Consistent deployment process
