@@ -36,8 +36,11 @@ ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=$NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-# Build the application
-RUN npm run build
+# Show environment for debugging
+RUN env
+
+# Build the application with verbose output
+RUN npm run build --verbose
 
 # Production image, copy all the files and run next
 FROM base AS runner
