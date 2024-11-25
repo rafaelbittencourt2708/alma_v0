@@ -36,12 +36,14 @@ ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=$NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-ENV NEXT_TELEMETRY_DISABLED 1
+# Show environment for debugging (excluding sensitive values)
+RUN echo "Build environment:" && \
+    echo "NODE_ENV: $NODE_ENV" && \
+    echo "NEXT_TELEMETRY_DISABLED: $NEXT_TELEMETRY_DISABLED" && \
+    echo "Clerk URLs configured: $NEXT_PUBLIC_CLERK_SIGN_IN_URL, $NEXT_PUBLIC_CLERK_SIGN_UP_URL"
 
-# Build Next.js
-RUN npm run build
+# Build Next.js with detailed output
+RUN npm run build --verbose || (echo "Build failed. Error log:" && cat /app/.next/error.log && exit 1)
 
 # Production image, copy all files and run next
 FROM base AS runner
