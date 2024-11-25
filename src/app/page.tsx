@@ -1,36 +1,31 @@
-import React from 'react'
+"use client";
+
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4 text-blue-700">Welcome to Clinic Assistant</h1>
+        <h1 className="text-4xl font-bold mb-4">Welcome to Alma</h1>
         <p className="text-xl text-gray-600 mb-8">
-          Your intelligent platform for managing medical practices efficiently
+          Your intelligent clinic assistant platform
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl transition-shadow">
-            <h2 className="text-2xl font-semibold mb-4 text-blue-600">Patient Management</h2>
-            <p className="text-gray-700">Streamline patient records and scheduling</p>
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl transition-shadow">
-            <h2 className="text-2xl font-semibold mb-4 text-blue-600">AI Assistant</h2>
-            <p className="text-gray-700">Intelligent support for medical workflows</p>
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-6 hover:shadow-xl transition-shadow">
-            <h2 className="text-2xl font-semibold mb-4 text-blue-600">Secure Communication</h2>
-            <p className="text-gray-700">HIPAA-compliant messaging and consultations</p>
-          </div>
-        </div>
-        <div className="mt-10">
-          <a 
-            href="/dashboard" 
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+        
+        <div className="space-x-4">
+          <Link
+            href="/sign-in"
+            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors inline-block"
           >
-            Get Started
-          </a>
+            Sign In
+          </Link>
+          <Link
+            href="/sign-up"
+            className="bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-900 transition-colors inline-block"
+          >
+            Sign Up
+          </Link>
         </div>
       </div>
-    </div>
-  )
+    </main>
+  );
 }
